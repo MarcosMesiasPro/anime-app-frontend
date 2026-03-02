@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Heart, Star, Tv, Film, ChevronLeft } from 'lucide-react'
+import { Heart, Star, Tv, ChevronLeft, Play } from 'lucide-react'
 import { getAnimeDetail } from '../api/anilistApi.js'
 import { addFavorite, removeFavorite, checkFavorite } from '../api/favoritesApi.js'
 import useAuthStore from '../store/authStore.js'
@@ -22,6 +22,64 @@ const SEASON_LABELS = {
   FALL: 'Otoño',
   WINTER: 'Invierno',
 }
+
+// ─── Reproductor de trailer ──────────────────────────────────────────────────
+// Muestra un thumbnail con botón Play. Al hacer clic, carga el iframe del video.
+// Soporta YouTube y Dailymotion (los únicos que usa AniList).
+
+const TrailerPlayer = ({ trailer }) => {
+  const [playing, setPlaying] = useState(false)
+
+  const embedUrl =
+    trailer.site === 'youtube'
+      ? `https://www.youtube.com/embed/${trailer.id}?autoplay=1&rel=0`
+      : `https://www.dailymotion.com/embed/video/${trailer.id}?autoplay=1`
+
+  const thumbnail =
+    trailer.thumbnail ||
+    (trailer.site === 'youtube'
+      ? `https://img.youtube.com/vi/${trailer.id}/maxresdefault.jpg`
+      : null)
+
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+      {playing ? (
+        <iframe
+          src={embedUrl}
+          title="Trailer"
+          className="w-full h-full"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+        />
+      ) : (
+        <button
+          onClick={() => setPlaying(true)}
+          className="group relative w-full h-full flex items-center justify-center"
+          aria-label="Reproducir trailer"
+        >
+          {thumbnail && (
+            <img
+              src={thumbnail}
+              alt="Thumbnail del trailer"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          {/* Overlay oscuro */}
+          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/55 transition-colors" />
+          {/* Botón Play */}
+          <div className="relative z-10 flex items-center justify-center w-16 h-16 rounded-full bg-red-600 shadow-2xl shadow-red-600/50 group-hover:scale-110 transition-transform">
+            <Play size={28} fill="white" className="text-white ml-1" />
+          </div>
+          <span className="absolute bottom-4 left-4 text-sm text-white font-medium z-10 drop-shadow">
+            {trailer.site === 'youtube' ? '▶ YouTube' : '▶ Dailymotion'}
+          </span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ─── Página de detalle ───────────────────────────────────────────────────────
 
 const AnimeDetailPage = () => {
   const { id } = useParams()
@@ -94,7 +152,7 @@ const AnimeDetailPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Back */}
+      {/* Volver */}
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors w-fit">
         <ChevronLeft size={16} /> Volver
       </Link>
@@ -107,9 +165,8 @@ const AnimeDetailPage = () => {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header: cover + info */}
       <div className="flex gap-6 flex-col sm:flex-row">
-        {/* Cover */}
         <div className="shrink-0">
           <img
             src={anime.coverImage?.extraLarge || anime.coverImage?.large}
@@ -118,7 +175,6 @@ const AnimeDetailPage = () => {
           />
         </div>
 
-        {/* Info */}
         <div className="flex flex-col gap-4 flex-1">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-zinc-100">{title}</h1>
@@ -186,13 +242,28 @@ const AnimeDetailPage = () => {
         </div>
       </div>
 
-      {/* Descripción */}
+      {/* Sinopsis */}
       {anime.description && (
         <div className="card p-6">
           <h2 className="text-lg font-semibold text-zinc-100 mb-3">Sinopsis</h2>
           <p className="text-sm text-zinc-400 leading-relaxed">
             {anime.description.replace(/<[^>]*>/g, '')}
           </p>
+        </div>
+      )}
+
+      {/* ─── Sección de Trailer ──────────────────────────────────────────── */}
+      {anime.trailer?.id && (
+        <div>
+          <h2 className="text-lg font-semibold text-zinc-100 mb-4">
+            Trailer
+            <span className="ml-2 text-xs font-normal text-zinc-500 capitalize">
+              ({anime.trailer.site})
+            </span>
+          </h2>
+          <div className="max-w-2xl">
+            <TrailerPlayer trailer={anime.trailer} />
+          </div>
         </div>
       )}
 
