@@ -1,16 +1,99 @@
-# React + Vite
+# Anime App Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern anime discovery web app connected to:
 
-Currently, two official plugins are available:
+- AniList GraphQL API (anime catalog/search)
+- Custom backend API (auth, favorites, comments, profile)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
 
-## React Compiler
+- React 19 + Vite
+- Tailwind CSS
+- React Router
+- TanStack React Query
+- Axios
+- React Hook Form + Zod
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- Login / Register
+- Explore tab with:
+  - Search
+  - Infinite scroll
+  - Genre filter
+  - Minimum score filter
+  - URL-persisted state (`q`, `genre`, `score`)
+- Anime detail page:
+  - Add/remove favorites toggle
+  - Comments CRUD
+  - Like/unlike comments
+- Favorites page
+- Profile page + edit profile
+- Global toast notifications (dedupe + queue limit)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+
+```txt
+src/
+  api/
+  components/
+  context/
+  hooks/
+  layouts/
+  pages/
+  routes/
+  utils/
+```
+
+## Getting Started
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Configure environment
+
+Create `.env`:
+
+```env
+VITE_API_URL=https://your-backend-domain.up.railway.app/api
+VITE_ANILIST_API=https://graphql.anilist.co
+```
+
+### 3) Run locally
+
+```bash
+npm run dev
+```
+
+Default dev URL:
+
+```txt
+http://localhost:5173
+```
+
+## Scripts
+
+- `npm run dev` - start development server
+- `npm run build` - build production bundle
+- `npm run preview` - preview production build
+- `npm run lint` - run ESLint
+
+## App Routes
+
+- `/` - Explore
+- `/anime/:animeId` - Anime detail
+- `/login` - Login (public only)
+- `/register` - Register (public only)
+- `/favorites` - Favorites (private)
+- `/profile` - Profile (private)
+- `/profile/edit` - Edit profile (private)
+
+## Deployment
+
+- Recommended: Vercel
+- Add environment variables in Vercel project settings:
+  - `VITE_API_URL`
+  - `VITE_ANILIST_API`
